@@ -1,0 +1,19 @@
+{
+  "name": "comrex-fleet-dashboard",
+  "version": "1.0.0",
+  "description": "Broadcast monitoring dashboard for Comrex audio codec fleet",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "stop": "lsof -ti tcp:3000 | xargs kill -9"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2"
+  }
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comrex Fleet Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3C!-- broadcast tower stem --%3E%3Crect x='15' y='17' width='2' height='9' fill='%233b82f6'/%3E%3C!-- base --%3E%3Crect x='11' y='26' width='10' height='2' rx='1' fill='%233b82f6'/%3E%3C!-- inner arc --%3E%3Cpath d='M11.5 16.5 A6.5 6.5 0 0 1 20.5 16.5' stroke='%2322c55e' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C!-- middle arc --%3E%3Cpath d='M8.5 13 A10 10 0 0 1 23.5 13' stroke='%2322c55e' stroke-width='2' fill='none' stroke-linecap='round' opacity='0.7'/%3E%3C!-- outer arc --%3E%3Cpath d='M5.5 9.5 A13.5 13.5 0 0 1 26.5 9.5' stroke='%2322c55e' stroke-width='2' fill='none' stroke-linecap='round' opacity='0.35'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+<!-- ── Header ────────────────────────────────────────────────────── -->
+<header>
+  <div class="header-inner">
+    <div class="header-title">
+      <img src="/img/wb_logo.svg" alt="Warner Bros. Discovery" style="height:28px;vertical-align:middle;margin-right:12px;background:#fff;border-radius:3px;padding:2px 4px;">Comrex <span>Fleet Dashboard</span>
+    </div>
+    <div class="header-meta">
+      <span id="last-updated">Loading…</span>
+      <div class="countdown-wrap">
+        <span id="countdown-label">30s</span>
+        <div class="countdown-bar-track">
+          <div class="countdown-bar-fill" id="countdown-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── Page Body ──────────────────────────────────────────────────── -->
+<div class="page">
+
+  <!-- Summary stats -->
+  <div class="summary">
+    <div class="stat-card">
+      <div class="stat-label">Total Units</div>
+      <div class="stat-value" id="stat-total">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Online</div>
+      <div class="stat-value green" id="stat-online">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Offline</div>
+      <div class="stat-value red" id="stat-offline">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Connected</div>
+      <div class="stat-value blue" id="stat-connected">—</div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <input type="search" id="search" placeholder="Filter by device name…" autocomplete="off" />
+  </div>
+
+  <!-- Error banner -->
+  <div id="error-banner" role="alert"></div>
+
+  <!-- Device groups -->
+  <main id="device-groups">
+    <div id="loading">Fetching device data…</div>
+  </main>
+
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

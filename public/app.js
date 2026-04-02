@@ -1,0 +1,214 @@
+'use strict';
+
+// ── Constants ──────────────────────────────────────────────────
+const POLL_INTERVAL_MS = 30_000;
+const GROUP_ORDER = [
+  'ACCESS MultiRack',
+  'BRIC-LINK',
+  'ACCESS Portable NX',
+];
+
+// ── Helpers ────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function stripPort(addr) {
+  if (!addr) return '—';
+  const colon = addr.lastIndexOf(':');
+  return colon !== -1 ? addr.slice(0, colon) : addr;
+}
+
+function formatTimestamp(isoStr) {
+  if (!isoStr) return '—';
+  try {
+    return new Date(isoStr).toLocaleString();
+  } catch {
+    return escHtml(isoStr);
+  }
+}
+
+// ── DOM refs ───────────────────────────────────────────────────
+const $groups      = document.getElementById('device-groups');
+const $loading     = document.getElementById('loading');
+const $errorBanner = document.getElementById('error-banner');
+const $lastUpdated = document.getElementById('last-updated');
+const $countdown   = document.getElementById('countdown-label');
+const $bar         = document.getElementById('countdown-bar');
+const $statTotal   = document.getElementById('stat-total');
+const $statOnline  = document.getElementById('stat-online');
+const $statOffline = document.getElementById('stat-offline');
+const $statConn    = document.getElementById('stat-connected');
+const $search      = document.getElementById('search');
+
+// ── State ──────────────────────────────────────────────────────
+let lastDevices = [];
+
+// ── Countdown ──────────────────────────────────────────────────
+let secondsLeft = 30;
+
+function resetCountdown() {
+  secondsLeft = 30;
+  updateCountdownUI();
+}
+
+function updateCountdownUI() {
+  $countdown.textContent = `${secondsLeft}s`;
+  const pct = (secondsLeft / 30) * 100;
+  $bar.style.width = `${pct}%`;
+  if (secondsLeft <= 5) {
+    $bar.classList.add('urgent');
+  } else {
+    $bar.classList.remove('urgent');
+  }
+}
+
+setInterval(() => {
+  if (secondsLeft > 0) {
+    secondsLeft--;
+    updateCountdownUI();
+  }
+}, 1000);
+
+// ── Rendering ──────────────────────────────────────────────────
+function badgeForRegStatus(status) {
+  const s = String(status ?? '').toLowerCase();
+  if (s === 'secure')  return `<span class="badge badge-green">Online</span>`;
+  if (s === 'offline') return `<span class="badge badge-red">Offline</span>`;
+  return `<span class="badge badge-gray">${escHtml(status)}</span>`;
+}
+
+function badgeForConnStatus(status) {
+  const s = String(status ?? '').toLowerCase();
+  if (s === 'connected') return `<span class="badge badge-blue">Connected</span>`;
+  if (s === 'idle')      return `<span class="badge badge-gray">Idle</span>`;
+  return `<span class="badge badge-gray">${escHtml(status)}</span>`;
+}
+
+function renderCard(device) {
+  const isOffline = String(device.reg_status ?? '').toLowerCase() === 'offline';
+  const cardClass = isOffline ? 'device-card offline' : 'device-card';
+  const ip = escHtml(stripPort(device.reg_address));
+  const fw = escHtml(device.firmware_version ?? '—');
+  const nat = escHtml(device.nat_type ?? '—');
+  const lastReg = escHtml(formatTimestamp(device.last_reg));
+
+  return `
+    <div class="${cardClass}">
+      <div class="card-name" title="${escHtml(device.unit_name)}">${escHtml(device.unit_name)}</div>
+      <div class="card-badges">
+        ${badgeForRegStatus(device.reg_status)}
+        ${badgeForConnStatus(isOffline ? 'idle' : device.conn_status)}
+      </div>
+      <div class="card-meta">
+        <div class="card-meta-row"><span>IP</span><span>${ip}</span></div>
+        <div class="card-meta-row"><span>Firmware</span><span>${fw}</span></div>
+        <div class="card-meta-row"><span>NAT</span><span>${nat}</span></div>
+        <div class="card-meta-row"><span>Last Reg</span><span>${lastReg}</span></div>
+        <div class="card-meta-row"><span>MAC Address</span><span>${escHtml(device.uuid ?? '—')}</span></div>
+      </div>
+    </div>`;
+}
+
+function renderGroups(devices) {
+  // Sort: alphabetical by name
+  const sorted = [...devices].sort((a, b) =>
+    String(a.unit_name ?? '').localeCompare(String(b.unit_name ?? ''))
+  );
+
+  // Group by product_type (merge BRIC-Link II and III into BRIC-LINK)
+  const grouped = {};
+  for (const d of sorted) {
+    const raw = d.product_type ?? 'Unknown';
+    const key = (raw === 'BRIC-Link II' || raw === 'BRIC-Link III') ? 'BRIC-LINK' : raw;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(d);
+  }
+
+  // Build ordered list of sections
+  const orderedKeys = [
+    ...GROUP_ORDER.filter(k => grouped[k]),
+    ...Object.keys(grouped).filter(k => !GROUP_ORDER.includes(k)).sort(),
+  ];
+
+  let html = '';
+  for (const key of orderedKeys) {
+    const cards = grouped[key].map(renderCard).join('');
+    html += `
+      <section class="group-section">
+        <div class="group-heading">${escHtml(key)} <span style="color:var(--border);font-weight:400">(${grouped[key].length})</span></div>
+        <div class="device-grid">${cards}</div>
+      </section>`;
+  }
+  return html;
+}
+
+function updateStats(devices) {
+  const total    = devices.length;
+  const online   = devices.filter(d => String(d.reg_status ?? '').toLowerCase() !== 'offline').length;
+  const offline  = total - online;
+  const connected = devices.filter(d =>
+    String(d.reg_status ?? '').toLowerCase() !== 'offline' &&
+    String(d.conn_status ?? '').toLowerCase() === 'connected'
+  ).length;
+
+  $statTotal.textContent   = total;
+  $statOnline.textContent  = online;
+  $statOffline.textContent = offline;
+  $statConn.textContent    = connected;
+}
+
+// ── Fetch ──────────────────────────────────────────────────────
+async function fetchUnits() {
+  let data;
+  try {
+    const res = await fetch('/api/units');
+    data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error ?? `HTTP ${res.status}`);
+    }
+  } catch (err) {
+    showError(`Failed to load device data: ${escHtml(err.message)}`);
+    resetCountdown();
+    return;
+  }
+
+  // data may be an array directly or wrapped
+  const devices = Array.isArray(data) ? data : (data.units ?? data.data ?? []);
+
+  lastDevices = devices;
+  hideError();
+  updateStats(devices);
+  applyFilter();
+  $lastUpdated.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+  resetCountdown();
+}
+
+function showError(msg) {
+  $errorBanner.innerHTML = `&#9888; ${msg}`;
+  $errorBanner.classList.add('visible');
+}
+
+function hideError() {
+  $errorBanner.classList.remove('visible');
+}
+
+// ── Filter ─────────────────────────────────────────────────────
+function applyFilter() {
+  const query = $search.value.trim().toLowerCase();
+  const filtered = query
+    ? lastDevices.filter(d => String(d.unit_name ?? '').toLowerCase().includes(query))
+    : lastDevices;
+  $groups.innerHTML = renderGroups(filtered);
+}
+
+$search.addEventListener('input', applyFilter);
+
+// ── Init ───────────────────────────────────────────────────────
+fetchUnits();
+setInterval(fetchUnits, POLL_INTERVAL_MS);

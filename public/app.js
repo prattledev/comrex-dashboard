@@ -140,10 +140,10 @@ function renderGroups(devices) {
   for (const key of orderedKeys) {
     const cards = grouped[key].map(renderCard).join('');
     html += `
-      <section class="group-section">
-        <div class="group-heading">${escHtml(key)} <span style="color:var(--border);font-weight:400">(${grouped[key].length})</span></div>
+      <details class="group-section" open>
+        <summary class="group-heading">${escHtml(key)} <span class="group-count">(${grouped[key].length})</span></summary>
         <div class="device-grid">${cards}</div>
-      </section>`;
+      </details>`;
   }
   return html;
 }

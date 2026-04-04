@@ -10,7 +10,11 @@ A real-time monitoring dashboard for Comrex broadcast codec devices (ACCESS Mult
 - Per-device cards showing registration status, connection status, IP address, firmware version, NAT type, and last registration time
 - Summary stats bar: total units, online, offline, connected
 - Search/filter by device name
+- Filter by status — Online, Offline, or Connected toggle (mutually exclusive)
+- Status change alerts — cards that flip online/offline between polls get a colored glow animation and a "↑ Came online" / "↓ Went offline" badge for the poll cycle
+- Export current view to CSV (respects active search and status filter)
 - Auto-refreshes every 30 seconds with a countdown timer
+- Collapsible device group sections
 - Server-side caching coalesces requests from multiple browser tabs into a single upstream API call
 
 ## Requirements

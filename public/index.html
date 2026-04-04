@@ -57,6 +57,7 @@
       <button class="status-btn" data-filter="connected">Connected</button>
     </div>
     <button id="export-csv" title="Export current view to CSV">Export CSV</button>
+    <button id="nat-info-btn" title="Learn about NAT types">NAT Types ?</button>
   </div>
 
   <!-- Error banner -->
@@ -67,6 +68,41 @@
     <div id="loading">Fetching device data…</div>
   </main>
 
+</div>
+
+<!-- ── NAT Types Modal ────────────────────────────────────────────── -->
+<div id="nat-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="nat-modal-title" hidden>
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="nat-modal-title">NAT Types</h2>
+      <button class="modal-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-intro">NAT (Network Address Translation) type affects whether a Comrex device can establish and receive codec connections. More restrictive NAT types may require STUN/TURN traversal assistance via Switchboard.</p>
+      <dl class="nat-list">
+        <div class="nat-entry">
+          <dt><span class="nat-badge nat-open">Open</span> Open Internet</dt>
+          <dd>No NAT in use. The device has a public IP and accepts inbound connections directly. Best possible connectivity.</dd>
+        </div>
+        <div class="nat-entry">
+          <dt><span class="nat-badge nat-good">Full Cone</span> Full Cone NAT</dt>
+          <dd>Any external host can send packets to the device's mapped port. Excellent for codec connections — reliable peer-to-peer without traversal assistance.</dd>
+        </div>
+        <div class="nat-entry">
+          <dt><span class="nat-badge nat-good">Restr. Cone</span> Restricted Cone NAT</dt>
+          <dd>Only hosts the device has previously contacted can send inbound packets. Generally works well for Comrex connections initiated through Switchboard.</dd>
+        </div>
+        <div class="nat-entry">
+          <dt><span class="nat-badge nat-warn">Port Restr. NAT</span> Port Restricted Cone NAT</dt>
+          <dd>Like Restricted Cone, but the source port must also match. Most consumer and business routers use this type. Switchboard traversal assistance is usually sufficient.</dd>
+        </div>
+        <div class="nat-entry">
+          <dt><span class="nat-badge nat-bad">Symmetric</span> Symmetric NAT</dt>
+          <dd>Each outbound connection gets a unique external port mapping. Hardest type for peer-to-peer — TURN relay via Switchboard is typically required for reliable connections.</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
 </div>
 
 <script src="/app.js"></script>

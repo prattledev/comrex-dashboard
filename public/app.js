@@ -307,6 +307,18 @@ function exportCSV() {
 
 document.getElementById('export-csv').addEventListener('click', exportCSV);
 
+// ── NAT Info Modal ─────────────────────────────────────────────
+const $natModal   = document.getElementById('nat-modal');
+const $natInfoBtn = document.getElementById('nat-info-btn');
+
+function openNatModal()  { $natModal.hidden = false; document.body.style.overflow = 'hidden'; }
+function closeNatModal() { $natModal.hidden = true;  document.body.style.overflow = ''; }
+
+$natInfoBtn.addEventListener('click', openNatModal);
+$natModal.addEventListener('click', e => { if (e.target === $natModal) closeNatModal(); });
+$natModal.querySelector('.modal-close').addEventListener('click', closeNatModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$natModal.hidden) closeNatModal(); });
+
 // ── Init ───────────────────────────────────────────────────────
 fetchUnits();
 setInterval(fetchUnits, POLL_INTERVAL_MS);

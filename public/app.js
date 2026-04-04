@@ -254,10 +254,10 @@ $search.addEventListener('input', applyFilter);
 document.querySelectorAll('.status-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const f = btn.dataset.filter;
-    if (activeFilters.has(f)) {
-      activeFilters.delete(f);
-      btn.classList.remove('active');
-    } else {
+    const isActive = activeFilters.has(f);
+    activeFilters.clear();
+    document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+    if (!isActive) {
       activeFilters.add(f);
       btn.classList.add('active');
     }

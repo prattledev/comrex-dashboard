@@ -265,6 +265,48 @@ document.querySelectorAll('.status-btn').forEach(btn => {
   });
 });
 
+// ── Export CSV ─────────────────────────────────────────────────
+function csvEscape(val) {
+  const s = String(val ?? '');
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportCSV() {
+  const query = $search.value.trim().toLowerCase();
+  const rows = lastDevices
+    .filter(d => !query || String(d.unit_name ?? '').toLowerCase().includes(query))
+    .filter(matchesStatusFilter);
+
+  const headers = ['Name', 'Status', 'Connection', 'IP', 'Firmware', 'NAT', 'Last Registered', 'MAC Address', 'Product Type'];
+  const lines = [
+    headers.join(','),
+    ...rows.map(d => {
+      const isOffline = String(d.reg_status ?? '').toLowerCase() === 'offline';
+      return [
+        csvEscape(d.unit_name),
+        csvEscape(isOffline ? 'Offline' : 'Online'),
+        csvEscape(isOffline ? 'Idle' : (d.conn_status ?? '')),
+        csvEscape(stripPort(d.reg_address)),
+        csvEscape(d.firmware_version),
+        csvEscape(d.nat_type),
+        csvEscape(formatTimestamp(d.last_reg)),
+        csvEscape(d.uuid),
+        csvEscape(d.product_type),
+      ].join(',');
+    }),
+  ];
+
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `comrex-fleet-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('export-csv').addEventListener('click', exportCSV);
+
 // ── Init ───────────────────────────────────────────────────────
 fetchUnits();
 setInterval(fetchUnits, POLL_INTERVAL_MS);

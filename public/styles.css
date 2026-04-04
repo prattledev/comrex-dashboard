@@ -172,6 +172,24 @@ header {
   border-color: var(--blue);
 }
 
+#export-csv {
+  margin-left: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 13px;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+#export-csv:hover {
+  border-color: var(--gray);
+  color: var(--text);
+}
+
 .status-filters {
   display: flex;
   gap: 6px;

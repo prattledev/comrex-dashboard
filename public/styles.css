@@ -488,7 +488,8 @@ header {
 .nat-warn { background: rgba(245,158,11,0.15);  color: var(--yellow); }
 .nat-bad  { background: rgba(239,68,68,0.15);   color: var(--red); }
 
-#nat-info-btn {
+#nat-info-btn,
+#reset-view-btn {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -500,7 +501,8 @@ header {
   transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-#nat-info-btn:hover {
+#nat-info-btn:hover,
+#reset-view-btn:hover {
   border-color: var(--gray);
   color: var(--text);
 }

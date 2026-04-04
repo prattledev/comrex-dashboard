@@ -170,7 +170,7 @@ function renderGroups(devices) {
   for (const key of orderedKeys) {
     const cards = grouped[key].map(renderCard).join('');
     html += `
-      <details class="group-section" open>
+      <details class="group-section" data-group="${escHtml(key)}" open>
         <summary class="group-heading">${escHtml(key)} <span class="group-count">(${grouped[key].length})</span></summary>
         <div class="device-grid">${cards}</div>
       </details>`;
@@ -241,12 +241,23 @@ function matchesStatusFilter(d) {
   return false;
 }
 
-function applyFilter() {
+function applyFilter(forceExpand = false) {
+  // Snapshot which groups are currently collapsed before re-rendering
+  const collapsed = forceExpand ? new Set() : new Set(
+    [...$groups.querySelectorAll('details.group-section:not([open])')]
+      .map(el => el.dataset.group)
+  );
+
   const query = $search.value.trim().toLowerCase();
   const filtered = lastDevices
     .filter(d => !query || String(d.unit_name ?? '').toLowerCase().includes(query))
     .filter(matchesStatusFilter);
   $groups.innerHTML = renderGroups(filtered);
+
+  // Restore collapsed state
+  $groups.querySelectorAll('details.group-section').forEach(el => {
+    if (collapsed.has(el.dataset.group)) el.removeAttribute('open');
+  });
 }
 
 $search.addEventListener('input', applyFilter);
@@ -306,6 +317,13 @@ function exportCSV() {
 }
 
 document.getElementById('export-csv').addEventListener('click', exportCSV);
+
+// ── Reset View ─────────────────────────────────────────────────
+document.getElementById('reset-view-btn').addEventListener('click', () => {
+  activeFilters.clear();
+  document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  applyFilter(true);
+});
 
 // ── NAT Info Modal ─────────────────────────────────────────────
 const $natModal   = document.getElementById('nat-modal');

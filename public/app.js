@@ -48,6 +48,7 @@ const $search      = document.getElementById('search');
 
 // ── State ──────────────────────────────────────────────────────
 let lastDevices = [];
+let statusChanges = new Map(); // uuid → 'online' | 'offline'
 const activeFilters = new Set();
 
 // ── Countdown ──────────────────────────────────────────────────
@@ -76,6 +77,22 @@ setInterval(() => {
   }
 }, 1000);
 
+// ── Status diff ────────────────────────────────────────────────
+function diffDevices(oldDevices, newDevices) {
+  const oldMap = new Map(oldDevices.map(d => [d.uuid, d.reg_status]));
+  const changes = new Map();
+  for (const d of newDevices) {
+    const oldStatus = oldMap.get(d.uuid);
+    if (oldStatus === undefined) continue;
+    const wasOffline = String(oldStatus ?? '').toLowerCase() === 'offline';
+    const isOffline  = String(d.reg_status ?? '').toLowerCase() === 'offline';
+    if (wasOffline !== isOffline) {
+      changes.set(d.uuid, isOffline ? 'offline' : 'online');
+    }
+  }
+  return changes;
+}
+
 // ── Rendering ──────────────────────────────────────────────────
 function badgeForRegStatus(status) {
   const s = String(status ?? '').toLowerCase();
@@ -93,7 +110,18 @@ function badgeForConnStatus(status) {
 
 function renderCard(device) {
   const isOffline = String(device.reg_status ?? '').toLowerCase() === 'offline';
-  const cardClass = isOffline ? 'device-card offline' : 'device-card';
+  const change = statusChanges.get(device.uuid ?? '');
+  const cardClass = [
+    'device-card',
+    isOffline ? 'offline' : '',
+    change === 'offline' ? 'changed-offline' : '',
+    change === 'online'  ? 'changed-online'  : '',
+  ].filter(Boolean).join(' ');
+  const changeBadge = change === 'offline'
+    ? `<span class="badge badge-change-offline">↓ Went offline</span>`
+    : change === 'online'
+    ? `<span class="badge badge-change-online">↑ Came online</span>`
+    : '';
   const ip = escHtml(stripPort(device.reg_address));
   const fw = escHtml(device.firmware_version ?? '—');
   const nat = escHtml(device.nat_type ?? '—');
@@ -105,6 +133,7 @@ function renderCard(device) {
       <div class="card-badges">
         ${badgeForRegStatus(device.reg_status)}
         ${badgeForConnStatus(isOffline ? 'idle' : device.conn_status)}
+        ${changeBadge}
       </div>
       <div class="card-meta">
         <div class="card-meta-row"><span>IP</span><span>${ip}</span></div>
@@ -182,6 +211,7 @@ async function fetchUnits() {
   // data may be an array directly or wrapped
   const devices = Array.isArray(data) ? data : (data.units ?? data.data ?? []);
 
+  statusChanges = lastDevices.length > 0 ? diffDevices(lastDevices, devices) : new Map();
   lastDevices = devices;
   hideError();
   updateStats(devices);

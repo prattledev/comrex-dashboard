@@ -50,6 +50,8 @@ const $search      = document.getElementById('search');
 let lastDevices = [];
 let statusChanges = new Map(); // uuid → 'online' | 'offline'
 const activeFilters = new Set();
+let sortField = 'name'; // 'name' | 'firmware' | 'last_reg'
+let sortDir   = 'asc';  // 'asc' | 'desc'
 
 // ── Countdown ──────────────────────────────────────────────────
 let secondsLeft = 30;
@@ -145,11 +147,33 @@ function renderCard(device) {
     </div>`;
 }
 
+function sortDevices(devices) {
+  return [...devices].sort((a, b) => {
+    let cmp;
+    if (sortField === 'firmware') {
+      cmp = String(a.firmware_version ?? '').localeCompare(
+        String(b.firmware_version ?? ''), undefined, { numeric: true }
+      );
+    } else if (sortField === 'ip') {
+      const toNum = d => stripPort(d.reg_address ?? '').split('.').reduce((acc, o) => acc * 256 + (parseInt(o) || 0), 0);
+      cmp = toNum(a) - toNum(b);
+    } else if (sortField === 'mac') {
+      cmp = String(a.uuid ?? '').localeCompare(String(b.uuid ?? ''));
+    } else if (sortField === 'nat') {
+      cmp = String(a.nat_type ?? '').localeCompare(String(b.nat_type ?? ''));
+    } else if (sortField === 'last_reg') {
+      const ta = a.last_reg ? new Date(a.last_reg).getTime() : 0;
+      const tb = b.last_reg ? new Date(b.last_reg).getTime() : 0;
+      cmp = ta - tb;
+    } else {
+      cmp = String(a.unit_name ?? '').localeCompare(String(b.unit_name ?? ''));
+    }
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+}
+
 function renderGroups(devices) {
-  // Sort: alphabetical by name
-  const sorted = [...devices].sort((a, b) =>
-    String(a.unit_name ?? '').localeCompare(String(b.unit_name ?? ''))
-  );
+  const sorted = sortDevices(devices);
 
   // Group by product_type (merge BRIC-Link II and III into BRIC-LINK)
   const grouped = {};
@@ -318,10 +342,42 @@ function exportCSV() {
 
 document.getElementById('export-csv').addEventListener('click', exportCSV);
 
+// ── Sort Controls ──────────────────────────────────────────────
+function updateSortButtons() {
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    const field = btn.dataset.sort;
+    if (field === sortField) {
+      btn.classList.add('active');
+      const labels = { name: 'Name', ip: 'IP', mac: 'MAC', nat: 'NAT Type', firmware: 'Firmware', last_reg: 'Last Reg' };
+      btn.textContent = labels[field] + (sortDir === 'asc' ? ' ↑' : ' ↓');
+    } else {
+      btn.classList.remove('active');
+      btn.textContent = { name: 'Name', ip: 'IP', mac: 'MAC', nat: 'NAT Type', firmware: 'Firmware', last_reg: 'Last Reg' }[field];
+    }
+  });
+}
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const field = btn.dataset.sort;
+    if (field === sortField) {
+      sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortField = field;
+      sortDir = 'asc';
+    }
+    updateSortButtons();
+    applyFilter();
+  });
+});
+
 // ── Reset View ─────────────────────────────────────────────────
 document.getElementById('reset-view-btn').addEventListener('click', () => {
   activeFilters.clear();
   document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  sortField = 'name';
+  sortDir = 'asc';
+  updateSortButtons();
   applyFilter(true);
 });
 

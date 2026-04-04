@@ -14,6 +14,8 @@
   <div class="header-inner">
     <div class="header-title"><img src="/img/logo-comrex.svg" alt="Comrex" class="header-logo" /><span class="product">Fleet Dashboard</span></div>
     <div class="header-meta">
+      <button id="export-csv" title="Export current view to CSV">Export CSV</button>
+      <button id="nat-info-btn" title="Learn about NAT types">NAT Types ?</button>
       <span id="last-updated">Loading…</span>
       <div class="countdown-wrap">
         <span id="countdown-label">30s</span>
@@ -48,17 +50,24 @@
     </div>
   </div>
 
-  <!-- Search + Status Filters -->
+  <!-- Search + Filters + Sort -->
   <div class="search-wrap">
     <input type="search" id="search" placeholder="Filter by device name…" autocomplete="off" />
     <div class="status-filters" role="group" aria-label="Filter by status">
       <button class="status-btn" data-filter="online">Online</button>
       <button class="status-btn" data-filter="offline">Offline</button>
       <button class="status-btn" data-filter="connected">Connected</button>
-      <button id="reset-view-btn" title="Expand all groups and clear filters">Reset View</button>
     </div>
-    <button id="export-csv" title="Export current view to CSV">Export CSV</button>
-    <button id="nat-info-btn" title="Learn about NAT types">NAT Types ?</button>
+    <button id="reset-view-btn" title="Expand all groups and clear filters">Reset View</button>
+    <div class="sort-controls" role="group" aria-label="Sort by">
+      <span class="sort-label">Sort:</span>
+      <button class="sort-btn active" data-sort="name">Name ↑</button>
+      <button class="sort-btn" data-sort="ip">IP</button>
+      <button class="sort-btn" data-sort="firmware">Firmware</button>
+      <button class="sort-btn" data-sort="nat">NAT Type</button>
+      <button class="sort-btn" data-sort="last_reg">Last Reg</button>
+      <button class="sort-btn" data-sort="mac">MAC</button>
+    </div>
   </div>
 
   <!-- Error banner -->

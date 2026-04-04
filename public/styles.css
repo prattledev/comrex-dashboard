@@ -172,8 +172,21 @@ header {
   border-color: var(--blue);
 }
 
-#export-csv {
+.sort-controls {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sort-label {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.sort-btn {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -185,10 +198,17 @@ header {
   transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-#export-csv:hover {
+.sort-btn:hover {
   border-color: var(--gray);
   color: var(--text);
 }
+
+.sort-btn.active {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: rgba(59, 130, 246, 0.1);
+}
+
 
 .status-filters {
   display: flex;
@@ -489,6 +509,24 @@ header {
 .nat-bad  { background: rgba(239,68,68,0.15);   color: var(--red); }
 
 #nat-info-btn,
+#export-csv {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+#nat-info-btn:hover,
+#export-csv:hover {
+  border-color: var(--gray);
+  color: var(--text);
+}
+
 #reset-view-btn {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -501,7 +539,6 @@ header {
   transition: border-color 0.15s, color 0.15s, background 0.15s;
 }
 
-#nat-info-btn:hover,
 #reset-view-btn:hover {
   border-color: var(--gray);
   color: var(--text);

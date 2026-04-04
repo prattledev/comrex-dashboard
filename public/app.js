@@ -48,6 +48,7 @@ const $search      = document.getElementById('search');
 
 // ── State ──────────────────────────────────────────────────────
 let lastDevices = [];
+const activeFilters = new Set();
 
 // ── Countdown ──────────────────────────────────────────────────
 let secondsLeft = 30;
@@ -199,15 +200,40 @@ function hideError() {
 }
 
 // ── Filter ─────────────────────────────────────────────────────
+function matchesStatusFilter(d) {
+  if (activeFilters.size === 0) return true;
+  const regStatus  = String(d.reg_status  ?? '').toLowerCase();
+  const connStatus = String(d.conn_status ?? '').toLowerCase();
+  const isOffline  = regStatus === 'offline';
+  if (activeFilters.has('online')    && !isOffline) return true;
+  if (activeFilters.has('offline')   && isOffline)  return true;
+  if (activeFilters.has('connected') && !isOffline && connStatus === 'connected') return true;
+  return false;
+}
+
 function applyFilter() {
   const query = $search.value.trim().toLowerCase();
-  const filtered = query
-    ? lastDevices.filter(d => String(d.unit_name ?? '').toLowerCase().includes(query))
-    : lastDevices;
+  const filtered = lastDevices
+    .filter(d => !query || String(d.unit_name ?? '').toLowerCase().includes(query))
+    .filter(matchesStatusFilter);
   $groups.innerHTML = renderGroups(filtered);
 }
 
 $search.addEventListener('input', applyFilter);
+
+document.querySelectorAll('.status-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const f = btn.dataset.filter;
+    if (activeFilters.has(f)) {
+      activeFilters.delete(f);
+      btn.classList.remove('active');
+    } else {
+      activeFilters.add(f);
+      btn.classList.add('active');
+    }
+    applyFilter();
+  });
+});
 
 // ── Init ───────────────────────────────────────────────────────
 fetchUnits();

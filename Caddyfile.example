@@ -1,0 +1,20 @@
+# Option A — LAN only (plain HTTP)
+# Access via http://<host-ip>
+#
+# :80 {
+#     reverse_proxy dashboard:3000
+# }
+
+# Option B — Public domain with automatic HTTPS
+# Caddy obtains a Let's Encrypt certificate automatically.
+# Ports 80 and 443 must be open to the internet.
+#
+# dashboard.yourdomain.com {
+#     reverse_proxy dashboard:3000
+# }
+
+# Option C — Cloudflare Tunnel (no open ports)
+# Cloudflare handles HTTPS at the edge; Caddy only needs plain HTTP internally.
+:80 {
+    reverse_proxy dashboard:3000
+}

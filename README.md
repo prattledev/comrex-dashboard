@@ -104,6 +104,25 @@ docker compose logs -f cloudflared # tunnel logs
 docker compose down                # stop and remove
 ```
 
+## Changing the Port
+
+The server listens on port `3000` by default. To use a different port, set `PORT` in your `.env` file:
+
+```
+PORT=8080
+```
+
+**Running locally:** restart the server after changing the value. The app will be at `http://localhost:8080`.
+
+**Running with Docker:** if you need to expose the port directly to the host (i.e. without Cloudflare Tunnel), update `compose.yml` to publish the new port:
+
+```yaml
+ports:
+  - "8080:8080"
+```
+
+If using Cloudflare Tunnel, update the tunnel's public hostname service in the Zero Trust dashboard to match the new port (e.g. `http://dashboard:8080`). No changes to `compose.yml` are needed.
+
 ## Project Structure
 
 ```

@@ -71,26 +71,46 @@ npm run stop
 
 ## Running with Docker
 
+The Docker Compose stack includes three services: the dashboard app, a Caddy reverse proxy, and a Cloudflare Tunnel. Traffic flows `cloudflared → caddy → dashboard` with no inbound ports open on the host.
+
 **1. Configure environment**
 
 ```bash
 cp .env.example .env
-# edit .env and set COMREX_API_TOKEN
 ```
 
-**2. Build and start**
+Edit `.env` and set both tokens:
+
+```
+COMREX_API_TOKEN=your_token_here
+CLOUDFLARE_TUNNEL_TOKEN=your_tunnel_token_here
+```
+
+Get the tunnel token from the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com) under **Networks → Tunnels → Create a tunnel**. Set the public hostname to your domain with service `http://caddy:80`.
+
+**2. Configure Caddy**
+
+```bash
+cp Caddyfile.example Caddyfile
+```
+
+The default `Caddyfile` serves plain HTTP on `:80` for use with the Cloudflare Tunnel. Edit it if you need a different setup.
+
+**3. Build and start**
 
 ```bash
 docker compose up -d
 ```
 
-The dashboard is available at [http://localhost:3000](http://localhost:3000).
+The dashboard is accessible at your Cloudflare tunnel domain. Cloudflare handles HTTPS at the edge.
 
-**3. View logs / stop**
+**4. View logs / stop**
 
 ```bash
-docker compose logs -f   # follow logs
-docker compose down      # stop and remove
+docker compose logs -f dashboard   # app logs
+docker compose logs -f caddy       # proxy logs
+docker compose logs -f cloudflared # tunnel logs
+docker compose down                # stop and remove
 ```
 
 ## Project Structure

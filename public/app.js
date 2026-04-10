@@ -222,10 +222,12 @@ async function fetchUnits() {
   let data;
   try {
     const res = await fetch('/api/units');
-    data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error ?? `HTTP ${res.status}`);
+      const ct = res.headers.get('content-type') ?? '';
+      const body = ct.includes('application/json') ? await res.json() : null;
+      throw new Error(body?.error ?? `HTTP ${res.status}`);
     }
+    data = await res.json();
   } catch (err) {
     showError(`Failed to load device data: ${escHtml(err.message)}`);
     resetCountdown();

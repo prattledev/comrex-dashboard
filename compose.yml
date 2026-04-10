@@ -1,8 +1,27 @@
 services:
   dashboard:
     build: .
-    ports:
-      - "3000:3000"
     environment:
       - COMREX_API_TOKEN=${COMREX_API_TOKEN}
     restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_logs:/var/log/caddy
+    restart: unless-stopped
+    depends_on:
+      - dashboard
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    restart: unless-stopped
+    depends_on:
+      - caddy
+
+volumes:
+  caddy_logs:

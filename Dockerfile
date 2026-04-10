@@ -7,6 +7,7 @@ RUN npm ci --omit=dev
 
 COPY . .
 
-EXPOSE 3000
+ARG PORT=3000
+EXPOSE ${PORT}
 
 CMD ["node", "server.js"]

@@ -1,0 +1,8 @@
+services:
+  dashboard:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - COMREX_API_TOKEN=${COMREX_API_TOKEN}
+    restart: unless-stopped

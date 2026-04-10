@@ -69,6 +69,30 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 npm run stop
 ```
 
+## Running with Docker
+
+**1. Configure environment**
+
+```bash
+cp .env.example .env
+# edit .env and set COMREX_API_TOKEN
+```
+
+**2. Build and start**
+
+```bash
+docker compose up -d
+```
+
+The dashboard is available at [http://localhost:3000](http://localhost:3000).
+
+**3. View logs / stop**
+
+```bash
+docker compose logs -f   # follow logs
+docker compose down      # stop and remove
+```
+
 ## Project Structure
 
 ```

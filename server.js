@@ -55,6 +55,6 @@ app.get('/api/units', async (req, res) => {
   res.json(body);
 });
 
-app.listen(PORT, '127.0.0.1', () => {
+app.listen(PORT, () => {
   console.log(`Comrex Dashboard running at http://localhost:${PORT}`);
 });

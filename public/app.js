@@ -226,7 +226,11 @@ async function fetchUnits() {
     if (!ct.includes('application/json')) {
       throw new Error(`HTTP ${res.status} — unexpected response from server`);
     }
-    data = await res.json();
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error(`HTTP ${res.status} — invalid response from server`);
+    }
     if (!res.ok) {
       throw new Error(data.error ?? `HTTP ${res.status}`);
     }

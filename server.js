@@ -39,6 +39,7 @@ app.get('/api/units', async (req, res) => {
     console.error(`Comrex API returned ${upstreamRes.status} ${upstreamRes.statusText}`);
     return res.status(502).json({
       error: `Upstream API error (${upstreamRes.status})`,
+      upstreamStatus: upstreamRes.status,
       status: 502,
     });
   }

@@ -232,10 +232,14 @@ async function fetchUnits() {
       throw new Error(`HTTP ${res.status} — invalid response from server`);
     }
     if (!res.ok) {
-      throw new Error(data.error ?? `HTTP ${res.status}`);
+      const msg = data.upstreamStatus === 429
+        ? 'Comrex API rate limit reached (max 2 requests per 60s)'
+        : (data.error ?? `HTTP ${res.status}`);
+      throw new Error(msg);
     }
   } catch (err) {
-    showError(`Failed to load device data: ${escHtml(err.message)}`);
+    const staleNote = lastDevices.length > 0 ? ' — showing last known data' : '';
+    showError(`${escHtml(err.message)}${staleNote}`);
     resetCountdown();
     return;
   }

@@ -104,6 +104,14 @@ docker compose logs -f cloudflared # tunnel logs
 docker compose down                # stop and remove
 ```
 
+**Updating to a new version**
+
+```bash
+git pull
+docker compose build dashboard
+docker compose up -d
+```
+
 ## Changing the Port
 
 The server listens on port `3000` by default. To use a different port, set `PORT` in your `.env` file:
